@@ -1,5 +1,5 @@
 # Stage 1: Build the app (with dependency caching)
-FROM eclipse-temurin:21-jdk-alpine as build
+FROM docker.io/eclipse-temurin:21-jdk-alpine as build
 
 WORKDIR /docker
 
@@ -18,7 +18,7 @@ COPY src src
 RUN ./mvnw clean package -DskipTests
 
 # Stage 2: Create the runtime image (optimized and slim)
-FROM eclipse-temurin:21-jdk-alpine
+FROM docker.io/eclipse-temurin:21-jdk-alpine
 
 WORKDIR /docker
 

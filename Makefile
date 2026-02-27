@@ -11,7 +11,7 @@ run:
 
 pod:
 	podman build -t myapp:latest .
-	podman run --name myapp-container myapp:latest
+	podman run --replace --name myapp-container myapp:latest
 
 
 # # Default: run locally
