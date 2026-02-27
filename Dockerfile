@@ -9,8 +9,7 @@ COPY .mvn .mvn
 COPY pom.xml pom.xml
 
 # Install dependencies and cache them (this step is cacheable)
-RUN chmod +x mvnw \
-    && ./mvnw dependency:go-offline
+RUN chmod +x mvnw && ./mvnw dependency:go-offline
 
 # Now copy the rest of the source code (this will invalidate cache only when the source changes)
 COPY src src
