@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One</title>
+</head>
+
+<body>
+    <!-- <div></div> -->
+    <div id="buttonArea"></div>
+
+    <script>
+        // TODO: WE HAVE TO WAIT FOR ALL THE BUTTON COUNTS TO BE FETCHED BEFORE SHOWING BUTTONS THIS MIGHT BE NOT NICE FOR USERS. SHOULD BE DONE IN 2 STEPS. 2 STEPS CAN ADD DRIFT AGAIN SO MAYBE A INTERVAL SYNC NEEDED. AND ALSO MAYBE ONE TABLE FOR NUMBERS SO NOT EVERY CLIENT NEEDS TO RECALCULATE. 
+
+        const buttonArea = document.getElementById("buttonArea");
+
+        // const power = 3;
+        // const power = 4;
+        // const power = 5;
+        // const power = 6;
+        // const buttonCount = 10**power;
+        const buttonCount = 5000;
+        // const buttonCount = 1000000;
+        console.log(buttonCount);
+        let buttonsState = {};
+
+        async function start() {
+            console.log("start");
+            buttonsState = await getButtonCounts(); // TODO: WE HAVE TO WAIT FOR ALL THE BUTTON COUNTS TO BE FETCHED BEFORE SHOWING BUTTONS THIS MIGHT BE NOT NICE FOR USERS. SHOULD BE DONE IN 2 STEPS. 2 STEPS CAN ADD DRIFT AGAIN SO MAYBE A INTERVAL SYNC NEEDED. AND ALSO MAYBE ONE TABLE FOR NUMBERS SO NOT EVERY CLIENT NEEDS TO RECALCULATE. 
+
+            for (let buttonId = 0; buttonId <= buttonCount; buttonId++) {
+
+                let currentButton = document.createElement("button");
+                if (buttonArea != null) {
+                    buttonArea.appendChild(currentButton);
+                }
+                currentButton.addEventListener("click", (e) => { onClickButton(buttonId, currentButton, e) });
+
+                // if ( buttonId in buttonCounts == false){
+                if ( buttonsState[buttonId] == undefined){ // MATBE: MAKE THIS MORE IDEOMATIC =?? 0
+                    buttonsState[buttonId] = 0;
+                }
+                const buttonValue = buttonsState[buttonId];
+                currentButton.innerText = buttonValue;// TODO SET CURRENT STATE
+            }
+        }
+
+        function onClickButton(id, currentButton, e) {
+            // console.log(`Clicked button ${e}`);
+            if (id in buttonsState == false) {
+                buttonsState[id] = 0;
+            }
+            let state = buttonsState[id];
+            let newState = state + 1;
+            // console.log(`State: ${state} and new: ${newState}`);
+            buttonsState[id] = newState; //buttonsState[bid]+1;
+            currentButton.innerText = newState;//buttonsState[bid];
+            postClick(id, newState);
+        }
+
+
+        async function postClick(buttonId, number) {
+            const urlBase = "http://localhost:3000/";
+            const path = "state";
+            const url = `${urlBase}${path}`
+            const bodyData = { "buttonId": buttonId, "value": number };
+            const bodyText = JSON.stringify(bodyData)
+            const result = await fetch(url, { "method": "POST", "body": bodyText });
+            // console.log(result);
+            const text = await result.text();
+            console.log(text);
+        }
+
+        async function getButtonCounts() {
+            const urlBase = "http://localhost:3000/";
+            const path = "state";
+            const url = `${urlBase}${path}`
+            const result = await fetch(url, { "method": "GET" });
+            // console.log(result);
+            // const text = await result.text();
+            // console.log(text);
+            const json = await result.json();
+            // console.log(json);
+
+
+            const idsSeen = {};
+
+            if (json instanceof (Array)) {
+
+
+
+                for (let i = 0; i < json.length; i++) { // for arrays make sure to do < instead of <= 
+
+                    // console.log(i);
+                    let current = json[i];
+                    // console.log(current);
+                    let currentId = current["buttonId"] // might be undefined
+                    // console.log(currentId);
+
+                    if (currentId in idsSeen == false) {
+                        idsSeen[currentId] = 0;
+                    }
+
+                    idsSeen[currentId] += 1;
+                    // console.log(idsSeen[currentId]);
+
+                }
+            }
+
+            // console.log(idsSeen);
+
+            return idsSeen;
+
+
+        }
+
+        // getAll();
+
+        document.addEventListener("DOMContentLoaded", start);
+    </script>
+
+</body>
+
+</html>
